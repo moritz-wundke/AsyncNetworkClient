@@ -1,0 +1,10 @@
+{
+  "name": "com.moritzwundke.ayncnet",
+  "displayName": "Async Network Client",
+  "description": "An async network client package adapted from the UniTask sample to be Task based.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Moritz Wundke",
+    "url": "https://www.moritzwundke.com"
+  }
+}
