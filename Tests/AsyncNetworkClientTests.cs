@@ -76,7 +76,6 @@ namespace AsyncNetClient.Tests
                     { EndpointUsers, (context, _) => Task.FromResult(new ResponseContext(context, context.Value, (long)HttpStatusCode.OK,
                         new Dictionary<string, string>()))
                     }
-                        
                 };
                 
                 var mockDecorator = new MockDecorator(mock);
@@ -142,7 +141,7 @@ namespace AsyncNetClient.Tests
             {
                 // Arrange
                 var client = new AsyncNetworkClient(ThirdPartyAPI, _timeoutLarge, 
-                    new RateLimitRequestDecorator(1), new LoggingDecorator());
+                    new RateLimitRequestDecorator(1));
 
                 // Act
                 var responses = await Task.WhenAll(client.SendAsync(HttpMethod.Get, EndpointUsersDelayed),
@@ -190,9 +189,8 @@ namespace AsyncNetClient.Tests
                 var maxBackoff = 5f;
 
                 var maxRetriesExceeded = false;
-                var loggingDecorator = new LoggingDecorator();
                 var backoffDecorator = new BackoffDecorator(backoffRetries, minBackoff, maxBackoff);
-                var client = new AsyncNetworkClient(ThirdPartyAPI, _timeout, backoffDecorator, loggingDecorator);
+                var client = new AsyncNetworkClient(ThirdPartyAPI, _timeout, backoffDecorator);
 
                 // Act and Assert
                 try
