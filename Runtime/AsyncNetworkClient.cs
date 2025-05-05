@@ -9,7 +9,7 @@ namespace AsyncNetClient
 {
     public class AsyncNetworkClient : IAsyncNetworkClient
     {
-        private readonly IAsyncNetDecorator[] _decorators;
+        private IAsyncNetDecorator[] _decorators;
         private readonly TimeSpan _timeout;
         private readonly string _basePath;
 
@@ -38,6 +38,13 @@ namespace AsyncNetClient
             _decorators = new IAsyncNetDecorator[decorators.Length + 1];
             Array.Copy(decorators, _decorators, decorators.Length);
             _decorators[^1] = new AsyncNetworkClientDecorator(this);
+        }
+        
+        public void AddDecorator(IAsyncNetDecorator decorator)
+        {
+            Array.Resize(ref _decorators, _decorators.Length + 1);
+            Array.Copy(_decorators, _decorators.Length - 2, _decorators, _decorators.Length - 1, 1);
+            _decorators[^2] = decorator;
         }
         
         public async Task<ResponseContext> SendAsync(HttpMethod method, string path, object request = null, CancellationToken cancellationToken = default)
