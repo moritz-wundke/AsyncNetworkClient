@@ -10,7 +10,7 @@ namespace AsyncNetClient.Utils
 {
     public static class AsyncExtensions
     {
-        public static async void Forget(this Task task, bool ignoreExceptions = true)
+        public static async void Forget(this Task task, bool ignoreExceptions = false)
         {
             try
             {

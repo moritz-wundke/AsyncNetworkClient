@@ -3,6 +3,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using AsyncNetClient.Serialization;
 using AsyncNetClient.Utils;
+#if WITH_NEWTONSOFT_JSON
+using Newtonsoft.Json;
+#endif
 using UnityEngine.Networking;
 
 namespace AsyncNetClient
@@ -28,6 +31,20 @@ namespace AsyncNetClient
                 return _client.SendAsync(context, cancellationToken);
             }
         }
+        
+#if WITH_NEWTONSOFT_JSON
+        public AsyncNetworkClient(JsonSerializerSettings settings, string basePath, TimeSpan timeout,
+            params IAsyncNetDecorator[] decorators)
+        {
+            // We could use other formats like Protobuf, but for now we use JSON
+            Serializer = SerializationFactory.Create(settings);
+            _basePath = basePath;
+            _timeout = timeout;
+            _decorators = new IAsyncNetDecorator[decorators.Length + 1];
+            Array.Copy(decorators, _decorators, decorators.Length);
+            _decorators[^1] = new AsyncNetworkClientDecorator(this);
+        }
+#endif
         
         public AsyncNetworkClient(string basePath, TimeSpan timeout, params IAsyncNetDecorator[] decorators)
         {
