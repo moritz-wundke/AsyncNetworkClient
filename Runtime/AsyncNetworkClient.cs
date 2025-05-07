@@ -133,8 +133,18 @@ namespace AsyncNetClient
                     break;
                 }
                 case HttpMethod.Get:
+                {
+                    if (context.Value is (string, string)[] args)
+                    {
+                        foreach (var arg in args)
+                        {
+                            url += $"{arg.Item1}={arg.Item2}&";
+                        }
+                    }
+
                     req = UnityWebRequest.Get(url);
                     break;
+                }
                 default:
                     throw new NotSupportedException($"HTTP method '{context.Method}' is not supported.");
             }
