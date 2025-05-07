@@ -51,6 +51,19 @@ namespace AsyncNetClient
             Timestamp = DateTimeOffset.UtcNow;
         }
         
+        public ResponseContext(RequestContext requestContext, byte[] bytes, long statusCode, string error, Dictionary<string, string> responseHeaders)
+        {
+            RequestContext = requestContext;
+            _bytes = bytes;
+            StatusCode = statusCode;
+            ResponseHeaders = responseHeaders;
+            IsSuccess = statusCode is >= 200 and < 300;
+            ResultState = IsSuccess ? UnityWebRequest.Result.Success : UnityWebRequest.Result.ProtocolError;
+            IsError = !IsSuccess;
+            Error = error;
+            Timestamp = DateTimeOffset.UtcNow;
+        }
+        
         public ResponseContext(RequestContext requestContext, object body, long statusCode, Dictionary<string, string> responseHeaders)
             : this(requestContext, Encoding.UTF8.GetBytes(requestContext.Serializer.SerializeObject(body)), statusCode, responseHeaders)
         {
