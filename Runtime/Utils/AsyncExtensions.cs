@@ -10,18 +10,19 @@ namespace AsyncNetClient.Utils
 {
     public static class AsyncExtensions
     {
-        public static async void Forget(this Task task, bool ignoreExceptions = false)
+        public static async void Forget(this Task task)
         {
             try
             {
                 await task;
             }
-            catch(Exception e)
+            catch(OperationCanceledException)
             {
-                if(!ignoreExceptions)
-                {
-                    Debug.LogException(e);
-                }
+                // Ignore cancellation exceptions
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
             }
         }
 
