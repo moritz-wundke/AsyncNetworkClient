@@ -60,7 +60,7 @@ namespace AsyncNetClient
             IsSuccess = statusCode is >= 200 and < 300;
             ResultState = IsSuccess ? UnityWebRequest.Result.Success : UnityWebRequest.Result.ProtocolError;
             IsError = !IsSuccess;
-            Error = error;
+            Error = $"{statusCode}: {error}";
             Timestamp = DateTimeOffset.UtcNow;
         }
         
