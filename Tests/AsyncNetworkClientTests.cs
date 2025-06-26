@@ -154,13 +154,13 @@ namespace AsyncNetClient.Tests
                 // Arrange
                 var client = new AsyncNetworkClientBuilder()
                     .WithBasePath(ThirdPartyAPI)
-                    .WithTimeout(_timeout)
+                    .WithTimeout(_timeoutLarge)
                     .WithDecorator(new RateLimitRequestDecorator(1)) // 1 request per second
                     .Build();
 
                 // Act
-                var responses = await Task.WhenAll(client.SendAsync(HttpMethod.Get, EndpointUsers),
-                    client.SendAsync(HttpMethod.Get, EndpointUsers));
+                var responses = await Task.WhenAll(client.SendAsync(HttpMethod.Get, EndpointUsersDelayed),
+                    client.SendAsync(HttpMethod.Get, EndpointUsersDelayed));
 
                 var result1 = responses[0].Timestamp;
                 var result2 = responses[1].Timestamp;
