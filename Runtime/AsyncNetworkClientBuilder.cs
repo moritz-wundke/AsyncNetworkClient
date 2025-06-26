@@ -6,8 +6,10 @@ namespace AsyncNetClient
 {
     public class AsyncNetworkClientBuilder
     {
+        private const int DefaultTimeout = 30;
+        
         private List<IAsyncNetDecorator> _decorators;
-        private TimeSpan _timeout;
+        private TimeSpan _timeout = TimeSpan.FromSeconds(DefaultTimeout);
         private string _basePath;
         private ISerializer _serializer;
         
