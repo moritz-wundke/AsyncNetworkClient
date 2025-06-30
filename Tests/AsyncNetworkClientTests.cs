@@ -79,7 +79,11 @@ namespace AsyncNetClient.Tests
                 };
                 
                 var mockDecorator = new MockDecorator(mock);
-                var client = new AsyncNetworkClient(FakeAPI, _timeout, mockDecorator);
+                var client = new AsyncNetworkClientBuilder()
+                    .WithBasePath(FakeAPI)
+                    .WithTimeout(_timeout)
+                    .WithDecorator(mockDecorator)
+                    .Build();
             
                 // Act
                 var response = await client.SendAsync(HttpMethod.Post, EndpointUsers, loginRequest);
@@ -100,7 +104,11 @@ namespace AsyncNetClient.Tests
                     username = "michaelw",
                     password = "michaelwpass"
                 };
-                var client = new AsyncNetworkClient(ThirdPartyAPI, _timeout);
+                
+                var client = new AsyncNetworkClientBuilder()
+                    .WithBasePath(ThirdPartyAPI)
+                    .WithTimeout(_timeout)
+                    .Build();
 
                 // Act
                 var response = await client.SendAsync(HttpMethod.Post, EndpointUsersLogin, loginRequest);
@@ -123,7 +131,11 @@ namespace AsyncNetClient.Tests
             TaskUtils.ToCoroutine(async () =>
             {
                 // Arrange
-                var client = new AsyncNetworkClient(ThirdPartyAPI, _timeout, new LoggingDecorator());
+                var client = new AsyncNetworkClientBuilder()
+                    .WithBasePath(ThirdPartyAPI)
+                    .WithTimeout(_timeout)
+                    .WithDecorator(new LoggingDecorator())
+                    .Build();
 
                 // Act
                 var response = await client.SendAsync(HttpMethod.Get, EndpointSingleUser);
@@ -140,8 +152,11 @@ namespace AsyncNetClient.Tests
             TaskUtils.ToCoroutine(async () =>
             {
                 // Arrange
-                var client = new AsyncNetworkClient(ThirdPartyAPI, _timeoutLarge, 
-                    new RateLimitRequestDecorator(1));
+                var client = new AsyncNetworkClientBuilder()
+                    .WithBasePath(ThirdPartyAPI)
+                    .WithTimeout(_timeoutLarge)
+                    .WithDecorator(new RateLimitRequestDecorator(1)) // 1 request per second
+                    .Build();
 
                 // Act
                 var responses = await Task.WhenAll(client.SendAsync(HttpMethod.Get, EndpointUsersDelayed),
@@ -161,7 +176,10 @@ namespace AsyncNetClient.Tests
             TaskUtils.ToCoroutine(async () =>
             {
                 // Arrange
-                var client = new AsyncNetworkClient(ThirdPartyAPI, _timeout);
+                var client = new AsyncNetworkClientBuilder()
+                    .WithBasePath(ThirdPartyAPI)
+                    .WithTimeout(_timeout)
+                    .Build();
                 var hasTimeout = false;
 
                 // Act and Assert
@@ -190,7 +208,11 @@ namespace AsyncNetClient.Tests
 
                 var maxRetriesExceeded = false;
                 var backoffDecorator = new BackoffDecorator(backoffRetries, minBackoff, maxBackoff);
-                var client = new AsyncNetworkClient(ThirdPartyAPI, _timeout, backoffDecorator);
+                var client = new AsyncNetworkClientBuilder()
+                    .WithBasePath(ThirdPartyAPI)
+                    .WithTimeout(_timeout)
+                    .WithDecorator(backoffDecorator)
+                    .Build();
 
                 // Act and Assert
                 try
