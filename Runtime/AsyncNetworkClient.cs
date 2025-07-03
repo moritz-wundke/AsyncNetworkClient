@@ -1,12 +1,8 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using AsyncNetClient.Requests;
 using AsyncNetClient.Serialization;
-using AsyncNetClient.Utils;
-#if WITH_NEWTONSOFT_JSON
-using Newtonsoft.Json;
-#endif
-using UnityEngine.Networking;
 
 namespace AsyncNetClient
 {
@@ -16,7 +12,9 @@ namespace AsyncNetClient
         private readonly TimeSpan _timeout;
         private readonly string _basePath;
 
-        public ISerializer Serializer { get; }
+        private ISerializer Serializer { get; }
+        
+        private IRequest Request { get; }
 
         private class AsyncNetworkClientDecorator : IAsyncNetDecorator
         {
@@ -32,9 +30,10 @@ namespace AsyncNetClient
             }
         }
 
-        public AsyncNetworkClient(ISerializer serializer, string basePath, TimeSpan timeout,
+        public AsyncNetworkClient(IRequest request, ISerializer serializer, string basePath, TimeSpan timeout,
             params IAsyncNetDecorator[] decorators)
         {
+            Request = request ?? RequestFactory.Create();
             Serializer = serializer ?? SerializationFactory.Create();
             _basePath = basePath;
             _timeout = timeout;
@@ -44,15 +43,8 @@ namespace AsyncNetClient
         }
         
         public AsyncNetworkClient(string basePath, TimeSpan timeout, params IAsyncNetDecorator[] decorators)
-            : this(SerializationFactory.Create(), basePath, timeout, decorators)
+            : this(RequestFactory.Create(), SerializationFactory.Create(), basePath, timeout, decorators)
         {
-        }
-        
-        public void AddDecorator(IAsyncNetDecorator decorator)
-        {
-            Array.Resize(ref _decorators, _decorators.Length + 1);
-            Array.Copy(_decorators, _decorators.Length - 2, _decorators, _decorators.Length - 1, 1);
-            _decorators[^2] = decorator;
         }
         
         public async Task<ResponseContext> SendAsync(HttpMethod method, string path, object request = null, CancellationToken cancellationToken = default)
@@ -70,87 +62,7 @@ namespace AsyncNetClient
         private async Task<ResponseContext> SendAsync(
             RequestContext context, CancellationToken cancellationToken)
         {
-            // TODO: Architecture - Add request abstraction o be able to use other
-            // libraries and http clients (consoles, etc)
-            using var req = CreateRequest(context);
-     
-            // Add the timeout via a cancellation token
-            var linkToken = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-            linkToken.CancelAfter(_timeout);
-            try
-            {
-                await req.SendWebRequest().WithCancellation(cancellationToken:linkToken.Token);
-            }
-            catch (OperationCanceledException)
-            {
-                if (!cancellationToken.IsCancellationRequested)
-                {
-                    throw new TimeoutException();
-                }
-            }
-            finally
-            {
-                // stop CancelAfter
-                if (!linkToken.IsCancellationRequested)
-                {
-                    linkToken.Cancel();
-                }
-            }
-            
-            // TODO: Optimization - Only access dara when he response context requires it,
-            // the response context should be a disposable too in this case
-            return new ResponseContext(context, req);
-        }
-        
-        private UnityWebRequest CreateRequest(RequestContext context)
-        {
-            var url = _basePath + context.Path;
-            UnityWebRequest req;
-
-            switch (context.Method)
-            {
-                case HttpMethod.Post:
-                {
-                    var data = Serializer.SerializeObject(context.Value);
-                    var bodyRequest = new System.Text.UTF8Encoding().GetBytes(data);
-                    req = new UnityWebRequest(url, HttpMethod.Post.ToString())
-                    {
-                        uploadHandler = new UploadHandlerRaw(bodyRequest)
-                        {
-                            contentType = Serializer.ContentType
-                        },
-                        downloadHandler = new DownloadHandlerBuffer()
-                    };
-                    break;
-                }
-                case HttpMethod.Get:
-                {
-                    if (context.Value is (string, string)[] args)
-                    {
-                        foreach (var arg in args)
-                        {
-                            url += $"{arg.Item1}={arg.Item2}&";
-                        }
-                    }
-
-                    req = UnityWebRequest.Get(url);
-                    break;
-                }
-                default:
-                    throw new NotSupportedException($"HTTP method '{context.Method}' is not supported.");
-            }
-
-            var header = context.GetRawHeaders();
-            if (header == null)
-            {
-                return req;
-            }
-            foreach (var item in header)
-            {
-                req.SetRequestHeader(item.Key, item.Value);
-            }
-
-            return req;
+            return await Request.SendAsync(context, cancellationToken);
         }
     }
 }

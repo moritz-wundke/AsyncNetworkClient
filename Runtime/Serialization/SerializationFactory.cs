@@ -9,7 +9,7 @@ namespace AsyncNetClient.Serialization
 #if WITH_NEWTONSOFT_JSON
         public static ISerializer Create(JsonSerializerSettings settings = null)
 #else
-        public static ISerializer Create()      
+        public static ISerializer Create()
 #endif
         {
 #if WITH_NEWTONSOFT_JSON

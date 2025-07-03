@@ -25,19 +25,20 @@ namespace AsyncNetClient
         
         public RequestContext RequestContext { get; }
         
-        public ResponseContext(RequestContext requestContext, UnityWebRequest request)
+
+        public ResponseContext(RequestContext requestContext, byte[] bytes, UnityWebRequest.Result resultState, long statusCode, string error, Dictionary<string, string> responseHeaders)
         {
             RequestContext = requestContext;
-            _bytes = request.downloadHandler.data;
-            StatusCode = request.responseCode;
-            ResponseHeaders = request.GetResponseHeaders();
-            IsSuccess = request.result == UnityWebRequest.Result.Success;
-            ResultState = request.result;
+            _bytes = bytes;
+            StatusCode = statusCode;
+            ResponseHeaders = responseHeaders;
+            ResultState = resultState;
+            IsSuccess = resultState == UnityWebRequest.Result.Success;
             IsError = !IsSuccess;
-            Error = request.error;
+            Error = $"{statusCode}: {error}";
             Timestamp = DateTimeOffset.UtcNow;
         }
- 
+        
         public ResponseContext(RequestContext requestContext, byte[] bytes, long statusCode, Dictionary<string, string> responseHeaders)
         {
             RequestContext = requestContext;
