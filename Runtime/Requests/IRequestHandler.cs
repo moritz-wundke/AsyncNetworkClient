@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 namespace AsyncNetClient.Requests
 {
-    public interface IRequest
+    public interface IRequestHandler
     {
         Task<ResponseContext> SendAsync(
             RequestContext context, 

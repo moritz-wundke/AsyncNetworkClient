@@ -6,7 +6,7 @@ using UnityEngine.Networking;
 
 namespace AsyncNetClient.Requests
 {
-    public class UnityWebRequestHandler : IRequest
+    public class UnityWebRequestHandlerHandler : IRequestHandler
     {
         public async Task<ResponseContext> SendAsync(RequestContext context, CancellationToken cancellationToken)
         {

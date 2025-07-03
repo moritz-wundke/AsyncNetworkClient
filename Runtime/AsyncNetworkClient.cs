@@ -14,7 +14,7 @@ namespace AsyncNetClient
 
         private ISerializer Serializer { get; }
         
-        private IRequest Request { get; }
+        private IRequestHandler RequestHandler { get; }
 
         private class AsyncNetworkClientDecorator : IAsyncNetDecorator
         {
@@ -30,10 +30,10 @@ namespace AsyncNetClient
             }
         }
 
-        public AsyncNetworkClient(IRequest request, ISerializer serializer, string basePath, TimeSpan timeout,
+        public AsyncNetworkClient(IRequestHandler requestHandler, ISerializer serializer, string basePath, TimeSpan timeout,
             params IAsyncNetDecorator[] decorators)
         {
-            Request = request ?? RequestFactory.Create();
+            RequestHandler = requestHandler ?? RequestFactory.Create();
             Serializer = serializer ?? SerializationFactory.Create();
             _basePath = basePath;
             _timeout = timeout;
@@ -62,7 +62,7 @@ namespace AsyncNetClient
         private async Task<ResponseContext> SendAsync(
             RequestContext context, CancellationToken cancellationToken)
         {
-            return await Request.SendAsync(context, cancellationToken);
+            return await RequestHandler.SendAsync(context, cancellationToken);
         }
     }
 }

@@ -13,7 +13,7 @@ namespace AsyncNetClient
         private TimeSpan _timeout = TimeSpan.FromSeconds(DefaultTimeout);
         private string _basePath;
         private ISerializer _serializer;
-        private IRequest _request;
+        private IRequestHandler _requestHandler;
         
         public AsyncNetworkClientBuilder WithTimeout(TimeSpan timeout)
         {
@@ -41,9 +41,9 @@ namespace AsyncNetClient
             return this;
         }
         
-        public AsyncNetworkClientBuilder WithRequest(IRequest request)
+        public AsyncNetworkClientBuilder WithRequestHandler(IRequestHandler requestHandler)
         {
-            _request = request ?? throw new ArgumentNullException(nameof(request), "Request cannot be null.");
+            _requestHandler = requestHandler ?? throw new ArgumentNullException(nameof(requestHandler), "Request cannot be null.");
             return this;
         }
         
@@ -68,7 +68,7 @@ namespace AsyncNetClient
             {
                 throw new InvalidOperationException("Timeout must be set to a value greater than zero before building the client.");
             }
-            return new AsyncNetworkClient(_request, _serializer, _basePath, _timeout,
+            return new AsyncNetworkClient(_requestHandler, _serializer, _basePath, _timeout,
                 _decorators != null ? _decorators.ToArray() : Array.Empty<IAsyncNetDecorator>());
         }
     }

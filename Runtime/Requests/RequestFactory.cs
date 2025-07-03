@@ -2,9 +2,9 @@
 {
     public static class RequestFactory
     {
-        public static IRequest Create()
+        public static IRequestHandler Create()
         {
-            return new UnityWebRequestHandler();
+            return new UnityWebRequestHandlerHandler();
         }
     }
 }
