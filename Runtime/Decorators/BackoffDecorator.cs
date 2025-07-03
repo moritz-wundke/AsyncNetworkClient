@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using AsyncNetClient.Utils;
-using UnityEngine;
 
 namespace AsyncNetClient.Decorators
 {

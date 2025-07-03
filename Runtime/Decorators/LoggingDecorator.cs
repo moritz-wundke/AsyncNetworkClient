@@ -2,7 +2,6 @@ using System;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
-using UnityEngine.Networking;
 
 namespace AsyncNetClient.Decorators
 {
@@ -19,7 +18,7 @@ namespace AsyncNetClient.Decorators
                 
                 if (response.IsError)
                 {
-                    UnityEngine.Debug.LogError($"Request Error: {context.Path}, Elapsed: {sw.Elapsed}, Code: {response.ResultState} Message: {response.Error}");
+                    UnityEngine.Debug.LogError($"Request Error: {context.Path}, Elapsed: {sw.Elapsed}, Code: {response.StatusCode} Message: {response.Error}");
                 }
                 else
                 {

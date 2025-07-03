@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-using AsyncNetClient.Serialization;
-using UnityEngine;
 using UnityEngine.Networking;
 
 namespace AsyncNetClient
@@ -18,26 +16,9 @@ namespace AsyncNetClient
         public bool IsSuccess { get; }
         
         public string Error { get; }
-        
-        public UnityWebRequest.Result ResultState { get; }
-        
         public DateTimeOffset Timestamp { get; }
         
         public RequestContext RequestContext { get; }
-        
-
-        public ResponseContext(RequestContext requestContext, byte[] bytes, UnityWebRequest.Result resultState, long statusCode, string error, Dictionary<string, string> responseHeaders)
-        {
-            RequestContext = requestContext;
-            _bytes = bytes;
-            StatusCode = statusCode;
-            ResponseHeaders = responseHeaders;
-            ResultState = resultState;
-            IsSuccess = resultState == UnityWebRequest.Result.Success;
-            IsError = !IsSuccess;
-            Error = $"{statusCode}: {error}";
-            Timestamp = DateTimeOffset.UtcNow;
-        }
         
         public ResponseContext(RequestContext requestContext, byte[] bytes, long statusCode, Dictionary<string, string> responseHeaders)
         {
@@ -46,7 +27,6 @@ namespace AsyncNetClient
             StatusCode = statusCode;
             ResponseHeaders = responseHeaders;
             IsSuccess = statusCode is >= 200 and < 300;
-            ResultState = IsSuccess ? UnityWebRequest.Result.Success : UnityWebRequest.Result.ProtocolError;
             IsError = !IsSuccess;
             Error = $"Error: {statusCode}";
             Timestamp = DateTimeOffset.UtcNow;
@@ -59,7 +39,6 @@ namespace AsyncNetClient
             StatusCode = statusCode;
             ResponseHeaders = responseHeaders;
             IsSuccess = statusCode is >= 200 and < 300;
-            ResultState = IsSuccess ? UnityWebRequest.Result.Success : UnityWebRequest.Result.ProtocolError;
             IsError = !IsSuccess;
             Error = $"{statusCode}: {error}";
             Timestamp = DateTimeOffset.UtcNow;

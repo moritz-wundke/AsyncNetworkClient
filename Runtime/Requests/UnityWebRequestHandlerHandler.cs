@@ -39,7 +39,6 @@ namespace AsyncNetClient.Requests
             // the response context should be a disposable too in this case
             return new ResponseContext(context,
                 req.downloadHandler.data,
-                req.result,
                 (int)req.responseCode,
                 req.error,
                 req.GetResponseHeaders());

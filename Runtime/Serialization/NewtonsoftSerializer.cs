@@ -1,7 +1,4 @@
 #if WITH_NEWTONSOFT_JSON
-using System.Globalization;
-using System.IO;
-using System.Text;
 using Newtonsoft.Json;
 
 namespace AsyncNetClient.Serialization
