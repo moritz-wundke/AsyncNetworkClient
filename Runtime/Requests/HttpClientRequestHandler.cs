@@ -25,29 +25,32 @@ namespace AsyncNetClient.Requests
 
         public async Task<ResponseContext> SendAsync(RequestContext context, CancellationToken cancellationToken)
         {
-            using var request = CreateHttpRequestMessage(context);
-
-            // Add timeout via cancellation token
-            using var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-            timeoutCts.CancelAfter(context.Timeout);
-
-            try
+            return await Task.Run(async () =>
             {
-                using var response = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, timeoutCts.Token);
+                using var request = CreateHttpRequestMessage(context);
 
-                // Use ConfigureAwait(false) to avoid context switching
-                var responseData = await response.Content.ReadAsByteArrayAsync().ConfigureAwait(false);
-                var responseHeaders = ExtractHeaders(response);
+                // Add timeout via cancellation token
+                using var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+                timeoutCts.CancelAfter(context.Timeout);
 
-                var errorMessage = response.IsSuccessStatusCode ? null :
-                    $"HTTP {(int)response.StatusCode} {response.ReasonPhrase}";
+                try
+                {
+                    using var response = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, timeoutCts.Token);
 
-                return new ResponseContext(context, responseData, (int)response.StatusCode, errorMessage, responseHeaders);
-            }
-            catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
-            {
-                throw new TimeoutException($"Request to {context.BasePath}{context.Path} timed out after {context.Timeout}");
-            }
+                    // Use ConfigureAwait(false) to avoid context switching
+                    var responseData = await response.Content.ReadAsByteArrayAsync().ConfigureAwait(false);
+                    var responseHeaders = ExtractHeaders(response);
+
+                    var errorMessage = response.IsSuccessStatusCode ? null :
+                        $"HTTP {(int)response.StatusCode} {response.ReasonPhrase}";
+
+                    return new ResponseContext(context, responseData, (int)response.StatusCode, errorMessage, responseHeaders);
+                }
+                catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
+                {
+                    throw new TimeoutException($"Request to {context.BasePath}{context.Path} timed out after {context.Timeout}");
+                }
+            }, cancellationToken).ConfigureAwait(false);
         }
 
         private static Dictionary<string, string> ExtractHeaders(HttpResponseMessage response)
