@@ -51,17 +51,13 @@ namespace AsyncNetClient.Decorators
         
         public async Task<ResponseContext> SendAsync(RequestContext context, CancellationToken cancellationToken, IAsyncNetDecorator.NextDecorator next)
         {
-#if UNITY_WEBGL
-            Debug.LogError("BackoffDecorator is not supported in WebGL builds. Please use a different decorator.");
-            return await next(context, cancellationToken);
-#else
             var backoff = GetBackoff(context);
             try
             {
                 var backoffDuration = backoff.NewAttempt(_jitter);
                 if (backoffDuration > 0)
                 {
-                    await Task.Delay(TimeSpan.FromSeconds(backoffDuration), cancellationToken: cancellationToken);
+                    await TaskUtils.Delay(backoffDuration, cancellationToken);
                 }
                 var response = await next(context, cancellationToken);
 
@@ -85,7 +81,6 @@ namespace AsyncNetClient.Decorators
                 context.Reset(this);
                 return await SendAsync(context, cancellationToken, next);
             }
-#endif
         }
         
         private static bool IsRetryableException(Exception exception)

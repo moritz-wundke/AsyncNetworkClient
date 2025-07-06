@@ -23,7 +23,7 @@ namespace AsyncNetClient.Requests
             {
                 if (!cancellationToken.IsCancellationRequested)
                 {
-                    throw new TimeoutException();
+                    throw new TimeoutException($"Request to {context.BasePath}{context.Path} timed out after {context.Timeout}");
                 }
             }
             finally
